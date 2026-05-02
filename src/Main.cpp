@@ -1,13 +1,11 @@
-#include <stdint.h>
 #include "global.h"
 #include "decode.h"
 #include "execute.h"
+#include "cpu.h"
 #include <iostream>
 #include <fstream>
-#include <iomanip>
 using namespace std;
-const UWord INSTRUCTION_MEMORY_LIMIT = 0x00000ffc; // Limite da memória de instruções
-const UWord DATA_MEMORY_LIMIT = 0x00003fff; // Limite da memória de dados
+
 
 void loadmem(){
     pc = 0x00000000; // inicializa o pc na .text
@@ -55,11 +53,14 @@ void loadmem(){
     }
     file2.close();
     pc = 0; // zera o pc
+    Reg[0] = 0; // zera o reg[0]
+    Reg[2] = sp;
+    Reg[3] = gp;
     return;
 }
 
 void fetch() {
-    if (pc >= INSTRUCTION_MEMORY_LIMIT) {
+    if (pc > INSTRUCTION_MEMORY_LIMIT) {
         Out = 1; // Programa atingiu o fim da memória de instruções
         return;
     }
@@ -68,14 +69,17 @@ void fetch() {
     UByte byte2 = Mem[pc + 2];
     UByte byte3 = Mem[pc + 3];
     ri = byte0 | (byte1 << 8) | (byte2 << 16) | (byte3 << 24);
-    if (pc >= INSTRUCTION_MEMORY_LIMIT) {
-        Out = 1; // Confirma que o próximo `pc` não será válido
-    }
 }
 void step(){
     fetch();
+    if (Out != 0) {
+        return; // Se o programa já terminou, não execute mais
+    }
     decode();
     execute();
+    if (Out != 0) {
+        return;
+    }
     pc += 4;
     return;
 }
@@ -89,6 +93,8 @@ void run(){
     } else if(Out == 2) {
         cout << endl;
         cout << "-- program is finished running (0) --" << endl;  // programa recebeu um ecall de saida
+    } else if (Out == 3) {
+        cout << "Erro: Execução interrompida por falha em instrução/memória" << endl;
     }else{
         cout << "Erro: Encerramento inesperado" << endl;
     }

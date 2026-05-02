@@ -1,6 +1,6 @@
 #include "global.h"
 UWord Reg[NUM_REGISTERS] = {0};  // Registradores inicializados com 0
-Byte Mem[MEM_SIZE] = {0};         // Memória inicializada com 0
+UByte Mem[MEM_SIZE] = {0};         // Memória inicializada com 0
 int Out = 0;                      // Inicialização da variável de saída
 UWord pc = 0x00000000;  
 UWord ri = 0x00000000;  
