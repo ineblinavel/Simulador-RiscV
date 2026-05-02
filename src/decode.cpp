@@ -1,4 +1,4 @@
-#include "global.h"
+#include "cpu.h"
 
 
 Opcode get_instr_code(uint32_t opcode, UWord funct3, UWord funct7) {
@@ -126,6 +126,7 @@ Word get_imm(UWord ri, UWord instr_type) {
 }
 
 void decode (){
+    UWord ri = cpu_state.ri;
     UWord opcode, rs2, rs1, rd, shamt, funct3, funct7;
     opcode	= ri & 0x7F;
 
