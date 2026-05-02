@@ -22,6 +22,10 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Download RARS
+        run: |
+          curl -L -o rars1_6.jar https://github.com/TheThirdOne/rars/releases/download/v1.6/rars1_6.jar
+
       - name: Build and run tests
         run: |
           make
