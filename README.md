@@ -20,16 +20,24 @@ Este projeto implementa um simulador do conjunto de instruções RISC-V em C++. 
 ```
 .
 ├── include/
+│   ├── cpu.h         # Estado da CPU e funções de ciclo (fetch/step/run)
 │   ├── decode.h      # Cabeçalho do decodificador de instruções
 │   ├── execute.h     # Cabeçalho do executor de instruções
-│   └── global.h      # Definições globais e estruturas de dados
+│   └── global.h      # Tipos, opcodes e contexto de instrução
 ├── src/
 │   ├── Main.cpp      # Ponto de entrada do programa principal
+│   ├── cpu.cpp       # Inicialização da CPU, carga de memória e loop principal
 │   ├── decode.cpp    # Implementação do decodificador de instruções
 │   ├── execute.cpp   # Implementação do executor de instruções
-│   └── global.cpp    # Implementação das variáveis globais
-├── teste/            # Diretório de arquivos de teste
-└── Makefile         # Configuração de compilação
+│   └── global.cpp    # Contexto global de instrução
+├── teste/
+│   ├── cases/        # Casos ASM para testes diferenciais
+│   ├── code.bin      # Binário de instruções carregado pelo simulador
+│   └── data.bin      # Binário de dados carregado pelo simulador
+├── scripts/
+│   └── run_differential.sh  # Runner de testes diferenciais com RARS
+├── README_TESTES.md
+└── Makefile          # Configuração de compilação e testes
 ```
 
 ## Compilando o Projeto
@@ -96,7 +104,21 @@ O simulador suporta as seguintes instruções RISC-V:
 
 ## Testes
 
-O projeto inclui uma suíte de testes no diretório `teste`. Os arquivos de teste verificam a implementação correta de cada instrução e fornecem exemplos de uso.
+O projeto inclui testes diferenciais no diretório `teste/cases`, comparando a saída do simulador com a saída de referência do RARS.
+
+Para rodar:
+
+```bash
+make test
+```
+
+Por padrão o runner usa `./rars1_6.jar`. Se quiser usar outro arquivo:
+
+```bash
+RARS_JAR=/caminho/para/rars.jar make test
+```
+
+Mais detalhes em `README_TESTES.md`.
 
 ## Contribuindo
 
