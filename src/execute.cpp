@@ -206,120 +206,120 @@ void ecall() {
 }
 
 void execute() {
-    UWord instrucao = ic.ins_code;
+    UWord instrucao = cpu_state.ic_t.ins_code;
     zera_r0();
     try {
         switch (instrucao) {
             case OP_ADD: 
                 //cout << "ADD" << endl;
-                ADD(ic.rd, ic.rs1, ic.rs2);
+                ADD(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.rs2);
                 break;
             case OP_ADDI: 
                 //cout << "ADDI" << endl;
-                ADDI(ic.rd, ic.rs1, ic.imm_i);
+                ADDI(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.imm_i);
                 break;
             case OP_AND: 
                 //cout << "AND" << endl;
-                AND(ic.rd, ic.rs1, ic.rs2);
+                AND(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.rs2);
                 break;
             case OP_ANDI: 
                 //cout << "ANDI" << endl;
-                ANDI(ic.rd, ic.rs1, ic.imm_i);
+                ANDI(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.imm_i);
                 break;
             case OP_AUIPC: 
                 //cout << "AUIPC" << endl;
-                AUIPC(ic.rd, ic.imm_u);
+                AUIPC(cpu_state.ic_t.rd, cpu_state.ic_t.imm_u);
                 break;
             case OP_BEQ: 
                 // cout << "BEQ" << endl;
-                BEQ(ic.rs1, ic.rs2, ic.imm_b);
+                BEQ(cpu_state.ic_t.rs1, cpu_state.ic_t.rs2, cpu_state.ic_t.imm_b);
                 break;
             case OP_BNE: 
                 //cout << "BNE" << endl;
-                BNE(ic.rs1, ic.rs2, ic.imm_b);
+                BNE(cpu_state.ic_t.rs1, cpu_state.ic_t.rs2, cpu_state.ic_t.imm_b);
                 break;
             case OP_BGE: 
                 //cout << "BGE" << endl;
-                BGE(ic.rs1, ic.rs2, ic.imm_b);
+                BGE(cpu_state.ic_t.rs1, cpu_state.ic_t.rs2, cpu_state.ic_t.imm_b);
                 break;
             case OP_BGEU: 
                 //cout << "BGEU" << endl;
-                BGEU(ic.rs1, ic.rs2, ic.imm_b);
+                BGEU(cpu_state.ic_t.rs1, cpu_state.ic_t.rs2, cpu_state.ic_t.imm_b);
                 break;
             case OP_BLT: 
                 //cout << "BLT" << endl;
-                BLT(ic.rs1, ic.rs2, ic.imm_b);
+                BLT(cpu_state.ic_t.rs1, cpu_state.ic_t.rs2, cpu_state.ic_t.imm_b);
                 break;
             case OP_BLTU: 
                 //cout << "BLTU" << endl;
-                BLTU(ic.rs1, ic.rs2, ic.imm_b);
+                BLTU(cpu_state.ic_t.rs1, cpu_state.ic_t.rs2, cpu_state.ic_t.imm_b);
                 break;
             case OP_JAL: 
                 //cout << "JAL" << endl;
-                JAL(ic.rd, ic.imm_j);
+                JAL(cpu_state.ic_t.rd, cpu_state.ic_t.imm_j);
                 break;
             case OP_JALR: 
                 //cout << "JALR" << endl;
-                JALR(ic.rd, ic.rs1, ic.imm_i);
+                JALR(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.imm_i);
                 break;
             case OP_LB: 
                 // cout << "LB" << endl;
-                LB(ic.rd, ic.rs1, ic.imm_i);
+                LB(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.imm_i);
                 break;
             case OP_OR: 
                 //cout << "OR" << endl;
-                OR(ic.rd, ic.rs1, ic.rs2);
+                OR(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.rs2);
                 break;
             case OP_LBU: 
                 //cout << "LBU" << endl;
-                LBU(ic.rd, ic.rs1, ic.imm_i);
+                LBU(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.imm_i);
                 break;
             case OP_LW: 
-                LW(ic.rd, ic.rs1, ic.imm_i);
+                LW(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.imm_i);
                 break;
             case OP_LUI: 
                 //cout << "LUI" << endl;
-                LUI(ic.rd, ic.imm_u);
+                LUI(cpu_state.ic_t.rd, cpu_state.ic_t.imm_u);
                 break;
             case OP_SLT: 
                 //cout << "SLT" << endl;
-                SLT(ic.rd, ic.rs1, ic.rs2);
+                SLT(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.rs2);
                 break;
             case OP_SLTU: 
                 //cout << "SLTU" << endl;
-                SLTU(ic.rd, ic.rs1, ic.rs2);
+                SLTU(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.rs2);
                 break;
             case OP_ORI: 
                 //cout << "ORI" << endl;
-                ORI(ic.rd, ic.rs1, ic.imm_i);
+                ORI(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.imm_i);
                 break;
             case OP_SB: 
                 //cout << "SB" << endl;
-                SB(ic.rs1, ic.rs2, ic.imm_s);
+                SB(cpu_state.ic_t.rs1, cpu_state.ic_t.rs2, cpu_state.ic_t.imm_s);
                 break;
             case OP_SLLI: 
                 //cout << "SLLI" << endl;
-                SLLI(ic.rd, ic.rs1, ic.imm_i);
+                SLLI(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.imm_i);
                 break;
             case OP_SRLI: 
                 //cout << "SRLI" << endl;
-                SRLI(ic.rd, ic.rs1, ic.imm_i);
+                SRLI(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.imm_i);
                 break;
             case OP_SRAI: 
                 //cout << "SRAI" << endl;
-                SRAI(ic.rd, ic.rs1, ic.imm_i);
+                SRAI(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.imm_i);
                 break;
             case OP_SUB: 
                 //cout << "SUB" << endl;
-                SUB(ic.rd, ic.rs1, ic.rs2);
+                SUB(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.rs2);
                 break;
             case OP_SW: 
                 //cout << "SW" << endl;
-                SW(ic.rs2, ic.rs1, ic.imm_s);
+                SW(cpu_state.ic_t.rs2, cpu_state.ic_t.rs1, cpu_state.ic_t.imm_s);
                 break;
             case OP_XOR: 
                 //cout << "XOR" << endl;
-                XOR(ic.rd, ic.rs1, ic.rs2);
+                XOR(cpu_state.ic_t.rd, cpu_state.ic_t.rs1, cpu_state.ic_t.rs2);
                 break;
             case OP_ECALL:
                 //cout << "ECALL" << endl;

@@ -56,20 +56,7 @@ enum Opcode {
     OP_XOR = 27,
     OP_ECALL = 28
 };
-typedef struct {
-    Opcode ins_code;     // Código da instrução
-    InstructionType ins_format;   // Formato da instrução
-    UWord rs1;          // Registrador 1
-    UWord rs2;          // Registrador 2
-    UWord rd;           // Registrador de destino
-    UWord shamt;        // Quantidade de shifts
-    Word imm_i;         // Imediato tipo I
-    Word imm_s;         // Imediato tipo S
-    Word imm_j;         // Imediato tipo J
-    Word imm_u;         // Imediato tipo U
-    Word imm_b;         // Imediato tipo B
-} instruction_context_st;
-extern instruction_context_st ic; // Contexto da instrução
+
 
 
 #endif

@@ -1,7 +1,7 @@
 #include "cpu.h"
 
 
-Opcode get_instr_code(uint32_t opcode, UWord funct3, UWord funct7) {
+Opcode get_instr_code(UWord opcode, UWord funct3, UWord funct7) {
     if (opcode == 0b0110011) { // Tipo R
         if (funct3 == 0x0 && funct7 == 0x00) return OP_ADD; // ADD
         else if (funct3 == 0x7 && funct7 == 0x00) return OP_AND; // AND
@@ -136,15 +136,15 @@ void decode (){
     shamt	= (ri >> 20) & 0x1F;
     funct3	= (ri >> 12) & 0x7;
     funct7  = (ri >> 25);				
-    ic.ins_code = get_instr_code(opcode, funct3, funct7);
-    ic.ins_format = get_i_format(opcode);
-    ic.rs1 = rs1;
-    ic.rs2 = rs2;
-    ic.rd = rd;
-    ic.shamt = shamt;
-    ic.imm_i = ic.ins_format == I_TYPE ? get_imm(ri, ic.ins_format) : 0;
-    ic.imm_s = ic.ins_format == S_TYPE ? get_imm(ri, ic.ins_format) : 0;
-    ic.imm_j = ic.ins_format == J_TYPE ? get_imm(ri, ic.ins_format) : 0;
-    ic.imm_u = ic.ins_format == U_TYPE ? get_imm(ri, ic.ins_format) : 0;
-    ic.imm_b = ic.ins_format == B_TYPE ? get_imm(ri, ic.ins_format) : 0;
+    cpu_state.ic_t.ins_code = get_instr_code(opcode, funct3, funct7);
+    cpu_state.ic_t.ins_format = get_i_format(opcode);
+    cpu_state.ic_t.rs1 = rs1;
+    cpu_state.ic_t.rs2 = rs2;
+    cpu_state.ic_t.rd = rd;
+    cpu_state.ic_t.shamt = shamt;
+    cpu_state.ic_t.imm_i = cpu_state.ic_t.ins_format == I_TYPE ? get_imm(ri, cpu_state.ic_t.ins_format) : 0;
+    cpu_state.ic_t.imm_s = cpu_state.ic_t.ins_format == S_TYPE ? get_imm(ri, cpu_state.ic_t.ins_format) : 0;
+    cpu_state.ic_t.imm_j = cpu_state.ic_t.ins_format == J_TYPE ? get_imm(ri, cpu_state.ic_t.ins_format) : 0;
+    cpu_state.ic_t.imm_u = cpu_state.ic_t.ins_format == U_TYPE ? get_imm(ri, cpu_state.ic_t.ins_format) : 0;
+    cpu_state.ic_t.imm_b = cpu_state.ic_t.ins_format == B_TYPE ? get_imm(ri, cpu_state.ic_t.ins_format) : 0;
 }
