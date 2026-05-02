@@ -1,5 +1,5 @@
-#ifndef GLOBAL_H
-#define GLOBAL_H
+#ifndef ISA_H
+#define ISA_H
 
 #include <stdint.h>
 
@@ -59,4 +59,4 @@ enum Opcode {
 
 
 
-#endif
+#endif // ISA_H

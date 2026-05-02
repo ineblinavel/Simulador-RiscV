@@ -1,6 +1,7 @@
 #ifndef CPU_H
 #define CPU_H
-#include "global.h"
+
+#include "isa.h"
 
 enum OUT_STATUS {
     RUNNING = 0,     // Simulador em execução

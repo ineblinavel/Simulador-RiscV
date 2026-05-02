@@ -1,4 +1,4 @@
-#include "global.h"
+#include "isa.h"
 #include "cpu.h"
 #include <iostream>
 #include <iomanip>
