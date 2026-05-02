@@ -1,4 +1,4 @@
-#include "global.h"
+#include "isa.h"
 #include "decode.h"
 #include "execute.h"
 #include "cpu.h"
