@@ -20,7 +20,7 @@ void initialize_cpu_state(CpuState &state) {
     state.ri = 0x00000000; // Inicializa o Registrador de Instrução
     state.sp = 0x00003ffc; // Inicializa o Stack Pointer
     state.gp = 0x00001800; // Inicializa o General Purpose Register
-
+    state.ic_t = {}; // Inicializa o contexto da instrução
     loadmemory(state);
 }
 
