@@ -3,6 +3,7 @@ CXXFLAGS := -Iinclude -Wall -Wextra -std=c++17 -g
 SRC_DIR := src
 INCLUDE_DIR := include
 OBJ_DIR := obj
+TEST_SCRIPT := scripts/run_differential.sh
 
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
@@ -24,4 +25,7 @@ clean:
 run: $(TARGET)
 	./$(TARGET)
 
-.PHONY: all clean run
+test: $(TARGET)
+	bash $(TEST_SCRIPT)
+
+.PHONY: all clean run test

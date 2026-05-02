@@ -15,15 +15,6 @@
 const UWord INSTRUCTION_MEMORY_LIMIT = 0x00000ffc;                             // Limite da memória de instruções
 const UWord DATA_MEMORY_LIMIT = 0x00003fff; // Limite da memória de dados
 
-extern UWord Reg[NUM_REGISTERS];  // Registradores
-extern UByte Mem[MEM_SIZE];        // Memória principal
-extern int Out;                   // Tipo de saída (ECALL ou fim de memória)
-extern UWord pc;                  // Program Counter
-extern UWord ri;                  // Registrador de instrução
-extern UWord sp;                  // Stack Pointer
-extern UWord gp;                  // General Purpose Register
-
-
 enum InstructionType {
     UNKNOWN_TYPE = -1,
     R_TYPE = 1, 

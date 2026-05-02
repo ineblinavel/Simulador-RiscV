@@ -331,7 +331,7 @@ void execute() {
         }
     } catch (const exception& e) {
         cerr << "Erro ao executar a instrucao: " << instrucao << ' ' << e.what() << endl;
-        Out = 3;
+        cpu_state.Out = OUT_ERROR;
     }
     // Zera o reg[0] após cada instrução
     zera_r0();
