@@ -62,7 +62,7 @@ void BGE(UWord rs1, UWord rs2, Word label){ //7
     }
 } 
 void BGEU(UWord rs1, UWord rs2, Word label){ //8
-    UWord temp = (UWord)cpu_state.Reg[rs2];
+    UWord temp = cpu_state.Reg[rs2];
     if(cpu_state.Reg[rs1] >= temp){
         move_pc(label);
     }    
@@ -75,7 +75,7 @@ void BLT(UWord rs1, UWord rs2, Word label){ //9
 }
 
 void BLTU(UWord rs1, UWord rs2, Word label){ //10
-    UWord temp = (UWord)cpu_state.Reg[rs2];
+    UWord temp = cpu_state.Reg[rs2];
     if((UWord)cpu_state.Reg[rs1] < temp){
         move_pc(label);
     }
@@ -92,12 +92,15 @@ void JALR(UWord rd, UWord rs1, Word label){ //12
     cpu_state.pc = target - 4;
 }
 
-void LB(UWord rd, UWord rs1, Word offset){ //13
-    if (!check_bounds(cpu_state.Reg[rs1] + offset)) {
+void LB(UWord rd, UWord rs1, Word offset) {
+    UWord address = cpu_state.Reg[rs1] + offset;
+
+    if (!check_bounds(address)) {
         return;
     }
-    Byte temp = static_cast<Byte>(cpu_state.Mem[cpu_state.Reg[rs1] + offset]);
-    cpu_state.Reg[rd] = (Word)temp;
+
+    Byte temp = static_cast<Byte>(cpu_state.Mem[address]);
+    cpu_state.Reg[rd] = static_cast<Word>(temp);
 }
 
 void OR(UWord rd, UWord rs1, UWord rs2){ //14
@@ -109,7 +112,7 @@ void LBU(UWord rd, UWord rs1, Word offset) { //15
         return;
     }
     UByte temp = cpu_state.Mem[cpu_state.Reg[rs1] + (offset)];  
-    cpu_state.Reg[rd] = (Word)temp;                
+    cpu_state.Reg[rd] = temp;                
 }
 
 
@@ -143,7 +146,7 @@ void SLT(UWord rd, UWord rs1, UWord rs2){ // 18
     }
 }
 void SLTU(UWord rd, UWord rs1, UWord rs2){ //19
-    UWord temp = (UWord)cpu_state.Reg[rs2];
+    UWord temp = cpu_state.Reg[rs2];
     if(cpu_state.Reg[rs1] < temp){
         cpu_state.Reg[rd] = 0x00000001;
     }else{
@@ -180,7 +183,7 @@ void SUB(UWord rd, UWord rs1, UWord rs2){ // 25
 void SW(UWord rs2, UWord rs1, Word offset){ //26
     UWord address = cpu_state.Reg[rs1] + offset;
     Word value = cpu_state.Reg[rs2];
-    if (!check_bounds(cpu_state.Reg[rs1] + offset, 4)) {
+    if (!check_bounds(address, 4)) {
         return;
     }
 
@@ -226,7 +229,7 @@ void ecall() {
 }
 
 void execute() {
-    UWord instrucao = cpu_state.ic_t.ins_code;
+    Opcode instrucao = cpu_state.ic_t.ins_code;
     zera_r0();
     try {
         switch (instrucao) {
@@ -344,6 +347,9 @@ void execute() {
             case OP_ECALL:
                 //cout << "ECALL" << endl;
                 ecall();
+                break;
+            case UNKNOWN_OPCODE:
+                throw runtime_error("Instrução desconhecida");
                 break;
             default:
                 throw runtime_error("Instrução desconhecida");
