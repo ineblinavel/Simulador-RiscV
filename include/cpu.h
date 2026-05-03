@@ -10,6 +10,19 @@ enum OUT_STATUS {
     OUT_ERROR = 3,   // Saída por erro de memoria ou instrução desconhecida
 };
 
+struct InstructionContext {
+    Opcode ins_code;            // Código da instrução
+    InstructionType ins_format; // Formato da instrução
+    UWord rs1;                  // Registrador 1
+    UWord rs2;                  // Registrador 2
+    UWord rd;                   // Registrador de destino
+    UWord shamt;                // Quantidade de shifts
+    Word imm_i;                 // Imediato tipo I
+    Word imm_s;                 // Imediato tipo S
+    Word imm_j;                 // Imediato tipo J
+    Word imm_u;                 // Imediato tipo U
+    Word imm_b;                 // Imediato tipo B
+};
 struct CpuState {
     UWord Reg[NUM_REGISTERS]; // Registradores
     UByte Mem[MEM_SIZE];      // Memória principal
@@ -18,19 +31,7 @@ struct CpuState {
     UWord ri;                 // Registrador de instrução
     UWord sp;                 // Stack Pointer
     UWord gp;                 // General Purpose Register
-    struct {
-        Opcode ins_code;            // Código da instrução
-        InstructionType ins_format; // Formato da instrução
-        UWord rs1;                  // Registrador 1
-        UWord rs2;                  // Registrador 2
-        UWord rd;                   // Registrador de destino
-        UWord shamt;                // Quantidade de shifts
-        Word imm_i;                 // Imediato tipo I
-        Word imm_s;                 // Imediato tipo S
-        Word imm_j;                 // Imediato tipo J
-        Word imm_u;                 // Imediato tipo U
-        Word imm_b;                 // Imediato tipo B
-    } ic_t;
+    InstructionContext ic_t;   // Contexto da instrução
 };
 
 void loadmemory(CpuState &state, const char* code_path = "teste/code.bin", const char* data_path = "teste/data.bin");
