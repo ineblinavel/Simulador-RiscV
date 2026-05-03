@@ -25,19 +25,52 @@ echo "Executando ${#ASM_FILES[@]} teste(s) diferencial(is)..."
 failures=0
 for asm in "${ASM_FILES[@]}"; do
   name="$(basename "$asm" .asm)"
+  expect_error=0
+  if [[ "$asm" == *.err.asm ]]; then
+    expect_error=1
+  fi
   ref_out="$ARTIFACTS_DIR/$name.ref.out"
   ref_err="$ARTIFACTS_DIR/$name.ref.err"
   sim_raw="$ARTIFACTS_DIR/$name.sim.raw.out"
+  sim_err="$ARTIFACTS_DIR/$name.sim.err"
   sim_out="$ARTIFACTS_DIR/$name.sim.out"
   ref_clean="$ARTIFACTS_DIR/$name.ref.clean.out"
   diff_out="$ARTIFACTS_DIR/$name.diff"
 
   rm -f "$CODE_BIN" "$DATA_BIN"
+  set +e
   java -jar "$RARS_JAR" a ae1 nc mc CompactTextAtZero dump .text Binary "$CODE_BIN" "$asm" >/dev/null 2>"$ref_err"
+  dump_text_rc=$?
   java -jar "$RARS_JAR" a ae1 nc mc CompactTextAtZero dump .data Binary "$DATA_BIN" "$asm" >/dev/null 2>>"$ref_err"
+  dump_data_rc=$?
   java -jar "$RARS_JAR" ae1 se1 nc me "$asm" >"$ref_out" 2>>"$ref_err"
+  rars_rc=$?
 
-  ./trabalho >"$sim_raw"
+  ./trabalho >"$sim_raw" 2>"$sim_err"
+  sim_rc=$?
+  set -e
+
+  if [[ $dump_text_rc -ne 0 || $dump_data_rc -ne 0 ]]; then
+    echo "FAIL $name (erro ao gerar code/data bin no RARS)"
+    failures=$((failures + 1))
+    continue
+  fi
+
+  if [[ $expect_error -eq 1 ]]; then
+    if [[ $rars_rc -ne 0 && $sim_rc -ne 0 ]]; then
+      echo "PASS $name (erro esperado)"
+    else
+      echo "FAIL $name (erro esperado não observado: rars_rc=$rars_rc sim_rc=$sim_rc)"
+      failures=$((failures + 1))
+    fi
+    continue
+  fi
+
+  if [[ $rars_rc -ne 0 || $sim_rc -ne 0 ]]; then
+    echo "FAIL $name (execução inesperadamente falhou: rars_rc=$rars_rc sim_rc=$sim_rc)"
+    failures=$((failures + 1))
+    continue
+  fi
 
   # Remove linhas de encerramento/ruído para comparação estável.
   grep -v -E '^(-- program is finished running \(0\) --|Program terminated by calling exit|[[:space:]]*)$' "$ref_out" >"$ref_clean" || true
