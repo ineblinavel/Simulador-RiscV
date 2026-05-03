@@ -13,7 +13,9 @@ const UWord DATA_MEMORY_BASE = 0x00002000;
 bool check_bounds(UWord address, UWord bytes = 1) {
     UWord end = address + bytes - 1;
     if (end < address || address < DATA_MEMORY_BASE || end > DATA_MEMORY_LIMIT || end >= MEM_SIZE) {
-        cerr << "Erro: Acesso fora dos limites de memória! Endereço: 0x" << hex << address << dec << endl;
+        cerr << "Erro: Acesso fora dos limites de memória!" << endl;
+        cerr << "  Instrução (PC): 0x" << setfill('0') << setw(8) << hex << cpu_state.pc - 4 << dec << endl;
+        cerr << "  Endereço violado: 0x" << hex << address << dec << endl;
         cpu_state.Out = OUT_ERROR;
         return false;
     }
@@ -116,6 +118,14 @@ void LW(UWord rd, UWord rs1, Word offset){ //16
         return;
     }
     Word addr = cpu_state.Reg[rs1] + offset;
+    if (addr % 4 != 0) {
+        
+        cerr << "Erro: Endereço de memória não alinhado para LW!" <<endl;
+        cerr << "Instrução (PC): 0x" << setfill('0') << setw(8) << hex << cpu_state.pc - 4 << dec << endl;
+        cerr << "Endereço violado: 0x" << hex << addr << dec << endl;
+        cpu_state.Out = OUT_ERROR;
+        return;
+    }
     UByte byte0 = cpu_state.Mem[addr];
     UByte byte1 = cpu_state.Mem[addr + 1];
     UByte byte2 = cpu_state.Mem[addr + 2];
@@ -168,14 +178,24 @@ void SUB(UWord rd, UWord rs1, UWord rs2){ // 25
 }
 
 void SW(UWord rs2, UWord rs1, Word offset){ //26
+    UWord address = cpu_state.Reg[rs1] + offset;
     Word value = cpu_state.Reg[rs2];
     if (!check_bounds(cpu_state.Reg[rs1] + offset, 4)) {
         return;
     }
-    cpu_state.Mem[cpu_state.Reg[rs1] + offset] = value & 0xFF;              
-    cpu_state.Mem[cpu_state.Reg[rs1] + offset + 1] = (value >> 8) & 0xFF;   
-    cpu_state.Mem[cpu_state.Reg[rs1] + offset + 2] = (value >> 16) & 0xFF;  
-    cpu_state.Mem[cpu_state.Reg[rs1] + offset + 3] = (value >> 24) & 0xFF; 
+
+    if (address % 4 != 0) {
+        cerr << "Erro: Endereço de memória não alinhado para SW!" << endl;
+        cerr << "Instrução (PC): 0x" << setfill('0') << setw(8) << hex << cpu_state.pc - 4 << dec << endl;
+        cerr << "Endereço: 0x" << hex << address << dec << endl;
+        cpu_state.Out = OUT_ERROR;
+        return;
+    }
+    cpu_state.Mem[address] = value & 0xFF;              
+    cpu_state.Mem[address + 1] = (value >> 8) & 0xFF;   
+    cpu_state.Mem[address + 2] = (value >> 16) & 0xFF;  
+    cpu_state.Mem[address + 3] = (value >> 24) & 0xFF; 
+    
 }
 void XOR(UWord rd, UWord rs1, UWord rs2){ //27
     cpu_state.Reg[rd] = cpu_state.Reg[rs1] ^ cpu_state.Reg[rs2];

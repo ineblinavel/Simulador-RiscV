@@ -109,16 +109,17 @@ void run() {
     }
     if (cpu_state.Out == OUT_MEM_END) {
         cout << endl;
-        cout << "-- program is finished running (dropped off bottom) --"
-             << endl; // programa chegou ao final da memoria de instruçoes
+        cout << "-- program is finished running (dropped off bottom) --" << endl; // programa chegou ao final da memoria de instruçoes
+        exit(0);
     } else if (cpu_state.Out == OUT_ECALL) {
         cout << endl;
-        cout << "-- program is finished running (0) --"
-             << endl; // programa recebeu um ecall de saida
+        cout << "-- program is finished running (0) --" << endl; // programa recebeu um ecall de saida
+        exit(0);
     } else if (cpu_state.Out == OUT_ERROR) {
-        cout << "Erro: Execução interrompida por falha em instrução/memória"
-             << endl;
+        cout << "Erro: Execução interrompida por falha em instrução/memória" << endl;
+        exit(1); // programa terminou por erro de execução
     } else {
         cout << "Erro: Encerramento inesperado" << endl;
+        exit(1);
     }
 }
