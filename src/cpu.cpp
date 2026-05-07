@@ -2,6 +2,8 @@
 #include "cpu.h"
 #include "decode.h"
 #include "execute.h"
+#include "options.h"
+#include "logging.h"
 #include <fstream>
 #include <iostream>
 using namespace std;
@@ -9,6 +11,8 @@ using namespace std;
 CpuState cpu_state{};
 
 void initialize_cpu_state(CpuState &state) {
+    log_info("Initializing CPU state.");
+
     for (int i = 0; i < NUM_REGISTERS; i++) {
         state.Reg[i] = 0; // Inicializa os registradores com 0
     }
@@ -30,7 +34,7 @@ void loadmemory(CpuState &state, const char* code_path, const char* data_path) {
     
     ifstream file(code_path, ios::binary);
     if (!file.is_open()) {
-        cerr << "Não foi possível abrir o arquivo!" << endl;
+        log_error("Não foi possível abrir o arquivo!");
         return;
     }
     UWord instruction;
@@ -41,9 +45,9 @@ void loadmemory(CpuState &state, const char* code_path, const char* data_path) {
             state.Mem[state.pc + 2] = (instruction >> 16) & 0xFF;  // Byte 2
             state.Mem[state.pc + 3] = (instruction >> 24) & 0xFF;  // Byte 3
         } else {
-            cerr << "Erro: Acesso fora dos limites de memória!" << endl;
-            cerr << "pc: " << state.pc << endl;
-            cerr << "Erro na leitura do arquivo! code.bin" << endl;
+            log_error("Erro: Acesso fora dos limites de memória!");
+            log_error("pc: " + to_string(state.pc));
+            log_error("Erro na leitura do arquivo! code.bin");
             break;
         }
         state.pc += 4;
@@ -53,7 +57,7 @@ void loadmemory(CpuState &state, const char* code_path, const char* data_path) {
     state.pc = 0x00002000; // inicializa o pc na .data
     ifstream file2(data_path, ios::binary);
     if (!file2.is_open()) {
-        cerr << "Erro na leitura do arquivo! data.bin" << endl;
+        log_error("Erro na leitura do arquivo! data.bin");
         return;
     }
     UWord data;
@@ -64,9 +68,9 @@ void loadmemory(CpuState &state, const char* code_path, const char* data_path) {
             state.Mem[state.pc + 2] = (data >> 16) & 0xFF; // Byte 2
             state.Mem[state.pc + 3] = (data >> 24) & 0xFF; // Byte 3
         } else {
-            cerr << "Erro: Acesso fora dos limites de memória!" << endl;
-            cerr << "pc: " << state.pc << endl;
-            cerr << "Erro na leitura do arquivo! data.bin" << endl;
+            log_error("Erro: Acesso fora dos limites de memória!");
+            log_error("pc: " + to_string(state.pc));
+            log_error("Erro na leitura do arquivo! data.bin");
             break;
         }
         state.pc += 4;
@@ -108,18 +112,20 @@ void run() {
         step();
     }
     if (cpu_state.Out == OUT_MEM_END) {
+        log_info("Programa atingiu o fim da memória de instruções.");
         cout << endl;
         cout << "-- program is finished running (dropped off bottom) --" << endl; // programa chegou ao final da memoria de instruçoes
         exit(0);
     } else if (cpu_state.Out == OUT_ECALL) {
+        log_info("Programa recebeu um ecall de saida.");
         cout << endl;
         cout << "-- program is finished running (0) --" << endl; // programa recebeu um ecall de saida
         exit(0);
     } else if (cpu_state.Out == OUT_ERROR) {
-        cout << "Erro: Execução interrompida por falha em instrução/memória" << endl;
+        log_error("Erro: Encerramento por erro de execução");
         exit(1); // programa terminou por erro de execução
     } else {
-        cout << "Erro: Encerramento inesperado" << endl;
+        log_error("Erro: Encerramento inesperado");
         exit(1);
     }
 }

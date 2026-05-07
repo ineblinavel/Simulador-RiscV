@@ -1,5 +1,6 @@
 #include "isa.h"
 #include "cpu.h"
+#include "logging.h"
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
@@ -8,17 +9,34 @@ void zera_r0(){
     cpu_state.Reg[0] = 0;
 }
 
+void write_register(UWord rd, UWord value) {
+    if (rd == 0) {
+        log_warning("Tentativa de escrever em x0 (sempre zero). Valor será ignorado.");
+        return;
+    }
+    cpu_state.Reg[rd] = value;
+}
+
 const UWord DATA_MEMORY_BASE = 0x00002000;
 
 bool check_bounds(UWord address, UWord bytes = 1) {
     UWord end = address + bytes - 1;
     if (end < address || address < DATA_MEMORY_BASE || end > DATA_MEMORY_LIMIT || end >= MEM_SIZE) {
-        cerr << "Erro: Acesso fora dos limites de memória!" << endl;
-        cerr << "  Instrução (PC): 0x" << setfill('0') << setw(8) << hex << cpu_state.pc - 4 << dec << endl;
-        cerr << "  Endereço violado: 0x" << hex << address << dec << endl;
+        string msg = "Acesso fora dos limites de memória! PC: 0x" + 
+                     to_string(cpu_state.pc - 4) + " Endereço: 0x" + 
+                     to_string(address);
+        log_error(msg);
         cpu_state.Out = OUT_ERROR;
         return false;
     }
+    
+    // Warning: acesso muito perto do limite
+    if (end >= DATA_MEMORY_LIMIT - 16) {
+        string msg = "Acesso próximo ao limite de memória de dados! Endereço: 0x" + 
+                     to_string(address);
+        log_warning(msg);
+    }
+    
     return true;
 }
 
@@ -27,22 +45,22 @@ void move_pc(Word offset){
 }
 
 void ADD(UWord rd, UWord rs1, UWord rs2) {  //0
-    cpu_state.Reg[rd] = cpu_state.Reg[rs1] + cpu_state.Reg[rs2];  
+    write_register(rd, cpu_state.Reg[rs1] + cpu_state.Reg[rs2]);
 }
 void ADDI(UWord rd, UWord rs1, Word imm) { //1
-    cpu_state.Reg[rd] = (UWord)((Word)cpu_state.Reg[rs1] + imm);
+    write_register(rd, (UWord)((Word)cpu_state.Reg[rs1] + imm));
 }
 
 void AND(UWord rd, UWord rs1, UWord rs2){ //2
-    cpu_state.Reg[rd] = cpu_state.Reg[rs1] & cpu_state.Reg[rs2];
+    write_register(rd, cpu_state.Reg[rs1] & cpu_state.Reg[rs2]);
 }
 
 void ANDI(UWord rd, UWord rs1, Word imm){  //3
-    cpu_state.Reg[rd] = cpu_state.Reg[rs1] & imm;
+    write_register(rd, cpu_state.Reg[rs1] & imm);
 }
 
 void AUIPC(UWord rd, Word imm){
-    cpu_state.Reg[rd] = imm + cpu_state.pc;
+    write_register(rd, imm + cpu_state.pc);
 }
 void BEQ(UWord rs1, UWord rs2, Word label){ //5
     if((Word)cpu_state.Reg[rs1] == (Word)cpu_state.Reg[rs2]){
@@ -82,13 +100,13 @@ void BLTU(UWord rs1, UWord rs2, Word label){ //10
 }
 
 void JAL(UWord rd, Word label){ //11
-    cpu_state.Reg[rd] = cpu_state.pc + 4;
+    write_register(rd, cpu_state.pc + 4);
     move_pc(label);
 }
 
 void JALR(UWord rd, UWord rs1, Word label){ //12 
     UWord target = (cpu_state.Reg[rs1] + label) & ~1;
-    cpu_state.Reg[rd] = cpu_state.pc + 4;
+    write_register(rd, cpu_state.pc + 4);
     cpu_state.pc = target - 4;
 }
 
@@ -100,11 +118,11 @@ void LB(UWord rd, UWord rs1, Word offset) {
     }
 
     Byte temp = static_cast<Byte>(cpu_state.Mem[address]);
-    cpu_state.Reg[rd] = static_cast<Word>(temp);
+    write_register(rd, static_cast<Word>(temp));
 }
 
 void OR(UWord rd, UWord rs1, UWord rs2){ //14
-    cpu_state.Reg[rd] = cpu_state.Reg[rs1] | cpu_state.Reg[rs2];
+    write_register(rd, cpu_state.Reg[rs1] | cpu_state.Reg[rs2]);
 }
 
 void LBU(UWord rd, UWord rs1, Word offset) { //15
@@ -112,7 +130,7 @@ void LBU(UWord rd, UWord rs1, Word offset) { //15
         return;
     }
     UByte temp = cpu_state.Mem[cpu_state.Reg[rs1] + (offset)];  
-    cpu_state.Reg[rd] = temp;                
+    write_register(rd, temp);
 }
 
 
@@ -123,9 +141,10 @@ void LW(UWord rd, UWord rs1, Word offset){ //16
     Word addr = cpu_state.Reg[rs1] + offset;
     if (addr % 4 != 0) {
         
-        cerr << "Erro: Endereço de memória não alinhado para LW!" <<endl;
-        cerr << "Instrução (PC): 0x" << setfill('0') << setw(8) << hex << cpu_state.pc - 4 << dec << endl;
-        cerr << "Endereço violado: 0x" << hex << addr << dec << endl;
+        string msg = "Endereço de memória não alinhado para LW! PC: 0x" + 
+                     to_string(cpu_state.pc - 4) + " Endereço: 0x" + 
+                     to_string(addr);
+        log_error(msg);
         cpu_state.Out = OUT_ERROR;
         return;
     }
@@ -133,28 +152,29 @@ void LW(UWord rd, UWord rs1, Word offset){ //16
     UByte byte1 = cpu_state.Mem[addr + 1];
     UByte byte2 = cpu_state.Mem[addr + 2];
     UByte byte3 = cpu_state.Mem[addr + 3];
-    cpu_state.Reg[rd] = byte0 | (byte1 << 8) | (byte2 << 16) | (byte3 << 24);
+    UWord value = byte0 | (byte1 << 8) | (byte2 << 16) | (byte3 << 24);
+    write_register(rd, value);
 }
 void LUI(UWord rd, Word imm){ //17
-    cpu_state.Reg[rd] = imm;
+    write_register(rd, imm);
 }
 void SLT(UWord rd, UWord rs1, UWord rs2){ // 18
     if((Word)cpu_state.Reg[rs1] < (Word)cpu_state.Reg[rs2]){
-        cpu_state.Reg[rd] = 0x00000001;
+        write_register(rd, 0x00000001);
     }else{
-        cpu_state.Reg[rd] = 0x00000000;
+        write_register(rd, 0x00000000);
     }
 }
 void SLTU(UWord rd, UWord rs1, UWord rs2){ //19
     UWord temp = cpu_state.Reg[rs2];
     if(cpu_state.Reg[rs1] < temp){
-        cpu_state.Reg[rd] = 0x00000001;
+        write_register(rd, 0x00000001);
     }else{
-        cpu_state.Reg[rd] = 0x00000000;
+        write_register(rd, 0x00000000);
     }
 }
 void ORI(UWord rd, UWord rs1, Word imm){ // 20
-    cpu_state.Reg[rd] = cpu_state.Reg[rs1] | imm;
+    write_register(rd, cpu_state.Reg[rs1] | imm);
 }
 
 void SB(UWord rs1, UWord rs2, Word offset){ //21 
@@ -166,18 +186,18 @@ void SB(UWord rs1, UWord rs2, Word offset){ //21
 }
 
 void SLLI(UWord rd, UWord rs1, Word imm){  //22
-    cpu_state.Reg[rd] = (Word)cpu_state.Reg[rs1] << imm;
+    write_register(rd, (Word)cpu_state.Reg[rs1] << imm);
 }
 
 void SRLI(UWord rd, UWord rs1, Word imm){  //23
-    cpu_state.Reg[rd] = cpu_state.Reg[rs1] >> imm;
+    write_register(rd, cpu_state.Reg[rs1] >> imm);
 }
 void SRAI(UWord rd, UWord rs1, Word imm){  // 24
-    cpu_state.Reg[rd] = ((signed)cpu_state.Reg[rs1]) >> imm;
+    write_register(rd, ((signed)cpu_state.Reg[rs1]) >> imm);
 }
 
 void SUB(UWord rd, UWord rs1, UWord rs2){ // 25
-    cpu_state.Reg[rd] = cpu_state.Reg[rs1] - cpu_state.Reg[rs2];
+    write_register(rd, cpu_state.Reg[rs1] - cpu_state.Reg[rs2]);
 }
 
 void SW(UWord rs2, UWord rs1, Word offset){ //26
@@ -188,9 +208,10 @@ void SW(UWord rs2, UWord rs1, Word offset){ //26
     }
 
     if (address % 4 != 0) {
-        cerr << "Erro: Endereço de memória não alinhado para SW!" << endl;
-        cerr << "Instrução (PC): 0x" << setfill('0') << setw(8) << hex << cpu_state.pc - 4 << dec << endl;
-        cerr << "Endereço: 0x" << hex << address << dec << endl;
+        string msg = "Endereço de memória não alinhado para SW! PC: 0x" + 
+                     to_string(cpu_state.pc - 4) + " Endereço: 0x" + 
+                     to_string(address);
+        log_error(msg);
         cpu_state.Out = OUT_ERROR;
         return;
     }
@@ -356,7 +377,8 @@ void execute() {
                 break;
         }
     } catch (const exception& e) {
-        cerr << "Erro ao executar a instrucao: " << instrucao << ' ' << e.what() << endl;
+        string msg = "Erro ao executar instrução. Detalhes: " + string(e.what());
+        log_error(msg);
         cpu_state.Out = OUT_ERROR;
     }
     // Zera o reg[0] após cada instrução
