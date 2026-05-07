@@ -118,7 +118,6 @@ Por padrão o runner usa `./rars1_6.jar`. Se quiser usar outro arquivo:
 RARS_JAR=/caminho/para/rars.jar make test
 ```
 
-Mais detalhes em `README_TESTES.md`.
 
 ## Contribuindo
 

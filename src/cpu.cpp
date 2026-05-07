@@ -1,9 +1,9 @@
-#include "isa.h"
 #include "cpu.h"
 #include "decode.h"
 #include "execute.h"
 #include "options.h"
 #include "logging.h"
+#include "isa.h"
 #include <fstream>
 #include <iostream>
 using namespace std;
@@ -19,31 +19,38 @@ void initialize_cpu_state(CpuState &state) {
     for (int i = 0; i < MEM_SIZE; i++) {
         state.Mem[i] = 0; // Inicializa a memória com 0
     }
-    state.Out = RUNNING; // Define o estado de saída como RUNNING
+    state.Out = RUNNING;   // Define o estado de saída como RUNNING
     state.pc = 0x00000000; // Inicializa o Program Counter
     state.ri = 0x00000000; // Inicializa o Registrador de Instrução
     state.sp = 0x00003ffc; // Inicializa o Stack Pointer
     state.gp = 0x00001800; // Inicializa o General Purpose Register
-    state.ic_t = {}; // Inicializa o contexto da instrução
+    state.ic_t = {};       // Inicializa o contexto da instrução
+    state.cycles = 0;      // Inicializa o contador de ciclos
+    state.instret = 0;     // Inicializa o contador de instruções executadass
+    state.alu_count = 0;   // Inicializa contador ALU
+    state.branch_count = 0; // Inicializa contador de branches
+    state.jump_count = 0;   // Inicializa contador de jumps
+    state.memory_count = 0; // Inicializa contador de memória
+    state.other_count = 0;  // Inicializa contador de outras instruções
     loadmemory(state);
 }
 
-
-void loadmemory(CpuState &state, const char* code_path, const char* data_path) {
+void loadmemory(CpuState &state, const char *code_path, const char *data_path) {
     state.pc = 0x00000000; // inicializa o pc na .text
-    
+
     ifstream file(code_path, ios::binary);
     if (!file.is_open()) {
         log_error("Não foi possível abrir o arquivo!");
         return;
     }
     UWord instruction;
-    while (file.read(reinterpret_cast<char*>(&instruction), sizeof(instruction))) {
+    while (file.read(reinterpret_cast<char *>(&instruction),
+                     sizeof(instruction))) {
         if (state.pc + 3 < MEM_SIZE) {
-            state.Mem[state.pc] = instruction & 0xFF;              // Byte 0
-            state.Mem[state.pc + 1] = (instruction >> 8) & 0xFF;   // Byte 1
-            state.Mem[state.pc + 2] = (instruction >> 16) & 0xFF;  // Byte 2
-            state.Mem[state.pc + 3] = (instruction >> 24) & 0xFF;  // Byte 3
+            state.Mem[state.pc] = instruction & 0xFF;             // Byte 0
+            state.Mem[state.pc + 1] = (instruction >> 8) & 0xFF;  // Byte 1
+            state.Mem[state.pc + 2] = (instruction >> 16) & 0xFF; // Byte 2
+            state.Mem[state.pc + 3] = (instruction >> 24) & 0xFF; // Byte 3
         } else {
             log_error("Erro: Acesso fora dos limites de memória!");
             log_error("pc: " + to_string(state.pc));
@@ -85,7 +92,8 @@ void loadmemory(CpuState &state, const char* code_path, const char* data_path) {
 
 void fetch() {
     if (cpu_state.pc > INSTRUCTION_MEMORY_LIMIT) {
-        cpu_state.Out = OUT_MEM_END; // Programa atingiu o fim da memória de instruções
+        cpu_state.Out =
+            OUT_MEM_END; // Programa atingiu o fim da memória de instruções
         return;
     }
     UByte byte0 = cpu_state.Mem[cpu_state.pc];
@@ -105,26 +113,37 @@ void step() {
         return;
     }
     cpu_state.pc += 4;
+    cpu_state.cycles++;
+    if(cpu_state.Out == RUNNING){
+        cpu_state.instret++;
+    }
     return;
 }
 void run() {
-    while (cpu_state.Out == 0) {
+    while(cpu_state.Out == RUNNING){
         step();
     }
+    
     if (cpu_state.Out == OUT_MEM_END) {
         log_info("Programa atingiu o fim da memória de instruções.");
+        print_performance_summary();
         cout << endl;
-        cout << "-- program is finished running (dropped off bottom) --" << endl; // programa chegou ao final da memoria de instruçoes
+        cout << "-- program is finished running (dropped off bottom) --"
+             << endl;
         exit(0);
     } else if (cpu_state.Out == OUT_ECALL) {
         log_info("Programa recebeu um ecall de saida.");
+        print_performance_summary();
         cout << endl;
-        cout << "-- program is finished running (0) --" << endl; // programa recebeu um ecall de saida
+        cout << "-- program is finished running (0) --"
+             << endl;
         exit(0);
     } else if (cpu_state.Out == OUT_ERROR) {
+        print_performance_summary();
         log_error("Erro: Encerramento por erro de execução");
-        exit(1); // programa terminou por erro de execução
+        exit(1);
     } else {
+        print_performance_summary();
         log_error("Erro: Encerramento inesperado");
         exit(1);
     }
