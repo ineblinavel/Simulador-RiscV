@@ -6,5 +6,6 @@ using namespace std;
 void log_info(const string &message);
 void log_error(const string &message);
 void log_warning(const string &message);
+void print_performance_summary();
 
 #endif // LOGGING_H

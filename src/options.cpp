@@ -1,5 +1,6 @@
 #include "options.h"
 #include <iostream>
+#include <cctype>
 Options options_global; // Variável global para armazenar as opções
 
 
@@ -12,6 +13,9 @@ Options parse_arguments(int argc, char *argv[]) {
             exit(0);
         } else if (arg == "--debug") {
             string debug_level = argv[++i];
+            // Convert to lowercase
+            for (auto &c : debug_level) c = tolower(c);
+            
             if (debug_level == "info" || debug_level == "i") {
                 options.DEBUG_LEVEL = INFO;
             } else if (debug_level == "warn" || debug_level == "w") {

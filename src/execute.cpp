@@ -44,6 +44,43 @@ void move_pc(Word offset){
     cpu_state.pc += offset - 4; // Subtrai 4 para compensar o incremento padrão do PC após a execução da instrução
 }
 
+void count_instruction_type(Opcode opcode) {
+    switch(opcode) {
+        // ALU instructions
+        case OP_ADD: case OP_ADDI: case OP_AND: case OP_ANDI: 
+        case OP_OR: case OP_ORI: case OP_SLT: case OP_SLTU:
+        case OP_SLLI: case OP_SRLI: case OP_SRAI: case OP_SUB:
+        case OP_LUI: case OP_AUIPC:
+            cpu_state.alu_count++;
+            break;
+            
+        // Branch instructions
+        case OP_BEQ: case OP_BNE: case OP_BGE: case OP_BGEU:
+        case OP_BLT: case OP_BLTU:
+            cpu_state.branch_count++;
+            break;
+            
+        // Jump instructions
+        case OP_JAL: case OP_JALR:
+            cpu_state.jump_count++;
+            break;
+            
+        // Memory instructions
+        case OP_LB: case OP_LBU: case OP_LW: case OP_SB: case OP_SW:
+            cpu_state.memory_count++;
+            break;
+            
+        // Other instructions
+        case OP_ECALL:
+            cpu_state.other_count++;
+            break;
+            
+        default:
+            cpu_state.other_count++;
+            break;
+    }
+}
+
 void ADD(UWord rd, UWord rs1, UWord rs2) {  //0
     write_register(rd, cpu_state.Reg[rs1] + cpu_state.Reg[rs2]);
 }
@@ -252,6 +289,7 @@ void ecall() {
 void execute() {
     Opcode instrucao = cpu_state.ic_t.ins_code;
     zera_r0();
+    count_instruction_type(instrucao);
     try {
         switch (instrucao) {
             case OP_ADD: 
