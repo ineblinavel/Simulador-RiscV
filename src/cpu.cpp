@@ -40,23 +40,24 @@ void loadmemory(CpuState &state, const char *code_path, const char *data_path) {
 
     ifstream file(code_path, ios::binary);
     if (!file.is_open()) {
-        log_error("Não foi possível abrir o arquivo!");
+        log_error("Não foi possível abrir o arquivo: " + string(code_path));
+        state.Out = OUT_ERROR;
         return;
     }
     UWord instruction;
     while (file.read(reinterpret_cast<char *>(&instruction),
                      sizeof(instruction))) {
-        if (state.pc + 3 < MEM_SIZE) {
-            state.Mem[state.pc] = instruction & 0xFF;             // Byte 0
-            state.Mem[state.pc + 1] = (instruction >> 8) & 0xFF;  // Byte 1
-            state.Mem[state.pc + 2] = (instruction >> 16) & 0xFF; // Byte 2
-            state.Mem[state.pc + 3] = (instruction >> 24) & 0xFF; // Byte 3
-        } else {
-            log_error("Erro: Acesso fora dos limites de memória!");
-            log_error("pc: " + to_string(state.pc));
-            log_error("Erro na leitura do arquivo! code.bin");
+        // Valida se instrução não excede limites de .text
+        if (state.pc + 3 > INSTRUCTION_MEMORY_LIMIT) {
+            log_error("Erro: Instrução excede limite de .text!");
+            log_error("PC: 0x" + to_string(state.pc));
+            state.Out = OUT_ERROR;
             break;
         }
+        state.Mem[state.pc] = instruction & 0xFF;             // Byte 0
+        state.Mem[state.pc + 1] = (instruction >> 8) & 0xFF;  // Byte 1
+        state.Mem[state.pc + 2] = (instruction >> 16) & 0xFF; // Byte 2
+        state.Mem[state.pc + 3] = (instruction >> 24) & 0xFF; // Byte 3
         state.pc += 4;
     }
     file.close();
@@ -64,29 +65,34 @@ void loadmemory(CpuState &state, const char *code_path, const char *data_path) {
     state.pc = 0x00002000; // inicializa o pc na .data
     ifstream file2(data_path, ios::binary);
     if (!file2.is_open()) {
-        log_error("Erro na leitura do arquivo! data.bin");
+        log_error("Não foi possível abrir o arquivo: " + string(data_path));
+        state.Out = OUT_ERROR;
         return;
     }
     UWord data;
     while (file2.read(reinterpret_cast<char *>(&data), sizeof(data))) {
-        if (state.pc + 3 < MEM_SIZE) {
-            state.Mem[state.pc] = data & 0xFF;             // Byte 0
-            state.Mem[state.pc + 1] = (data >> 8) & 0xFF;  // Byte 1
-            state.Mem[state.pc + 2] = (data >> 16) & 0xFF; // Byte 2
-            state.Mem[state.pc + 3] = (data >> 24) & 0xFF; // Byte 3
-        } else {
-            log_error("Erro: Acesso fora dos limites de memória!");
-            log_error("pc: " + to_string(state.pc));
-            log_error("Erro na leitura do arquivo! data.bin");
+        // Valida se dado não excede limites de .data
+        if (state.pc + 3 > DATA_MEMORY_LIMIT) {
+            log_error("Erro: Dados excedem limite de .data!");
+            log_error("PC: 0x" + to_string(state.pc));
+            state.Out = OUT_ERROR;
             break;
         }
+        state.Mem[state.pc] = data & 0xFF;             // Byte 0
+        state.Mem[state.pc + 1] = (data >> 8) & 0xFF;  // Byte 1
+        state.Mem[state.pc + 2] = (data >> 16) & 0xFF; // Byte 2
+        state.Mem[state.pc + 3] = (data >> 24) & 0xFF; // Byte 3
         state.pc += 4;
     }
     file2.close();
-    state.pc = 0;     // zera o pc
-    state.Reg[0] = 0; // zera o reg[0]
-    state.Reg[2] = state.sp;
-    state.Reg[3] = state.gp;
+    
+    // Reset pc e registradores apenas se carregamento foi bem-sucedido
+    if (state.Out != OUT_ERROR) {
+        state.pc = 0;     // zera o pc
+        state.Reg[0] = 0; // zera o reg[0]
+        state.Reg[2] = state.sp;
+        state.Reg[3] = state.gp;
+    }
     return;
 }
 
