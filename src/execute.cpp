@@ -290,6 +290,7 @@ void execute() {
     Opcode instrucao = cpu_state.ic_t.ins_code;
     zera_r0();
     count_instruction_type(instrucao);
+    log_trace(cpu_state);
     try {
         switch (instrucao) {
             case OP_ADD: 

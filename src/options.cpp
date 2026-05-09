@@ -34,6 +34,8 @@ Options parse_arguments(int argc, char *argv[]) {
             } else if (config == "compactTextAtZero") {
                 options.memory_config_type = COMPACT_TEXT_AT_ZERO;
             }
+        }else if ((arg == "--trace") || arg == "-t") {
+            options.TRACE = true; // Ativa o rastreamento detalhado
         }
     }
     return options;
