@@ -17,6 +17,7 @@ enum DebugLevel {
 };
 struct Options {
     DebugLevel DEBUG_LEVEL = NONE;   // Ativa mensagens de depuração
+    bool TRACE = false;                // Ativa rastreamento detalhado de cada instrução
     string asm_file_path = "";          // Caminho para o arquivo de código assembly
     MemoryConfigType memory_config_type = COMPACT_TEXT_AT_ZERO; // Tipo de configuração de memória (possiveis:  "default", "compactDataAtZero", "compactTextAtZero")
 };
