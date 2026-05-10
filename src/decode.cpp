@@ -1,6 +1,6 @@
 #include "cpu.h"
 #include <stdexcept>
-using namespace std;
+
 Opcode get_instr_code(UWord opcode, UWord funct3, UWord funct7) {
     if (opcode == 0b0110011) { // Tipo R
         if (funct3 == 0x0 && funct7 == 0x00) return OP_ADD; // ADD
@@ -125,7 +125,7 @@ Word get_imm(UWord ri, InstructionType instr_type) {
             imm = 0; // R-type instructions do not have an immediate value
             break;
         case UNKNOWN_TYPE:
-            throw runtime_error("Formato de instrução desconhecido");
+            throw std::runtime_error("Formato de instrução desconhecido");
             break;
 
     }

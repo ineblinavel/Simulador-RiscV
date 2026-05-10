@@ -7,12 +7,12 @@ Options options_global; // Variável global para armazenar as opções
 Options parse_arguments(int argc, char *argv[]) {
     Options options;
     for (int i = 1; i < argc; ++i) {
-        string arg = argv[i];
+        std::string arg = argv[i];
         if (arg == "--help" || arg == "-h") {
             help_message();
             exit(0);
         } else if (arg == "--debug") {
-            string debug_level = argv[++i];
+            std::string debug_level = argv[++i];
             // Convert to lowercase
             for (auto &c : debug_level) c = tolower(c);
             
@@ -26,7 +26,7 @@ Options parse_arguments(int argc, char *argv[]) {
         } else if ((arg == "--asm-file" || arg == "-f") && i + 1 < argc) {
             options.asm_file_path = argv[++i];
         } else if ((arg == "--memory-config" || arg == "-m") && i + 1 < argc) {
-            string config = argv[++i];
+            std::string config = argv[++i];
             if (config == "default") {
                 options.memory_config_type = DEFAULT;
             } else if (config == "compactDataAtZero") {
@@ -42,18 +42,18 @@ Options parse_arguments(int argc, char *argv[]) {
 }
 
 void help_message() {
-    cout << "Usage: ./trabalho [options]\n\n";
-    cout << "Options:\n";
-    cout << "  -h, --help                          Mostra esta mensagem de ajuda\n";
-    cout << "  --debug LEVEL                       Define nível de debug\n";
-    cout << "                                      NONE (padrão) | INFO | WARN | ERROR\n";
-    cout << "  -a, --asm-file <path>               Caminho para arquivo assembly\n";
-    cout << "  -mc, --memory-config <type>         Configuração de memória\n";
-    cout << "                                      default (padrão)\n";
-    cout << "                                      compactDataAtZero\n";
-    cout << "                                      compactTextAtZero\n\n";
-    cout << "Exemplos:\n";
-    cout << "  ./trabalho                          Executa com .data/.text padrão\n";
-    cout << "  ./trabalho --debug INFO             Com resumo de stats\n";
-    cout << "  ./trabalho --debug WARN -a prog.asm\n";
+    std::cout << "Usage: ./trabalho [options]\n\n";
+    std::cout << "Options:\n";
+    std::cout << "  -h, --help                          Mostra esta mensagem de ajuda\n";
+    std::cout << "  --debug LEVEL                       Define nível de debug\n";
+    std::cout << "                                      NONE (padrão) | INFO | WARN | ERROR\n";
+    std::cout << "  -a, --asm-file <path>               Caminho para arquivo assembly\n";
+    std::cout << "  -mc, --memory-config <type>         Configuração de memória\n";
+    std::cout << "                                      default (padrão)\n";
+    std::cout << "                                      compactDataAtZero\n";
+    std::cout << "                                      compactTextAtZero\n\n";
+    std::cout << "Exemplos:\n";
+    std::cout << "  ./trabalho                          Executa com .data/.text padrão\n";
+    std::cout << "  ./trabalho --debug INFO             Com resumo de stats\n";
+    std::cout << "  ./trabalho --debug WARN -a prog.asm\n";
 }

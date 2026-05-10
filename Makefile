@@ -5,10 +5,11 @@ INCLUDE_DIR := include
 OBJ_DIR := obj
 TEST_SCRIPT := scripts/run_differential.sh
 SAN_FLAGS := -fsanitize=address,undefined -fno-omit-frame-pointer
+LINT_FILES := $(SRC_DIR)/*.cpp $(INCLUDE_DIR)/*.h
 
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
-TARGET := trabalho
+TARGET := riscv-sim
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
@@ -32,8 +33,13 @@ test: $(TARGET)
 cppcheck:
 	cppcheck -I$(INCLUDE_DIR) --enable=all --inconclusive --std=c++17 --suppress=missingIncludeSystem --suppress=normalCheckLevelMaxBranches --error-exitcode=1 $(SRC_DIR)
 
+lint:
+	clang-tidy $(LINT_FILES) -- -I$(INCLUDE_DIR) -std=c++17
+
+lint-fix:
+	clang-tidy $(LINT_FILES) -fix -- -I$(INCLUDE_DIR) -std=c++17
 
 sanitize: CXXFLAGS += $(SAN_FLAGS)
 sanitize: clean all
 
-.PHONY: all clean run test cppcheck sanitize
+.PHONY: all clean run test cppcheck lint lint-fix sanitize

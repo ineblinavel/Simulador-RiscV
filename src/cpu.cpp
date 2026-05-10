@@ -6,7 +6,6 @@
 #include "isa.h"
 #include <fstream>
 #include <iostream>
-using namespace std;
 
 CpuState cpu_state{};
 
@@ -38,9 +37,9 @@ void initialize_cpu_state(CpuState &state) {
 void loadmemory(CpuState &state, const char *code_path, const char *data_path) {
     state.pc = 0x00000000; // inicializa o pc na .text
 
-    ifstream file(code_path, ios::binary);
+    std::ifstream file(code_path, std::ios::binary);
     if (!file.is_open()) {
-        log_error("Não foi possível abrir o arquivo: " + string(code_path));
+        log_error("Não foi possível abrir o arquivo: " + std::string(code_path));
         state.Out = OUT_ERROR;
         return;
     }
@@ -50,7 +49,7 @@ void loadmemory(CpuState &state, const char *code_path, const char *data_path) {
         // Valida se instrução não excede limites de .text
         if (state.pc + 3 > INSTRUCTION_MEMORY_LIMIT) {
             log_error("Erro: Instrução excede limite de .text!");
-            log_error("PC: 0x" + to_string(state.pc));
+            log_error("PC: 0x" + std::to_string(state.pc));
             state.Out = OUT_ERROR;
             break;
         }
@@ -63,9 +62,9 @@ void loadmemory(CpuState &state, const char *code_path, const char *data_path) {
     file.close();
 
     state.pc = 0x00002000; // inicializa o pc na .data
-    ifstream file2(data_path, ios::binary);
+    std::ifstream file2(data_path, std::ios::binary);
     if (!file2.is_open()) {
-        log_error("Não foi possível abrir o arquivo: " + string(data_path));
+        log_error("Não foi possível abrir o arquivo: " + std::string(data_path));
         state.Out = OUT_ERROR;
         return;
     }
@@ -74,7 +73,7 @@ void loadmemory(CpuState &state, const char *code_path, const char *data_path) {
         // Valida se dado não excede limites de .data
         if (state.pc + 3 > DATA_MEMORY_LIMIT) {
             log_error("Erro: Dados excedem limite de .data!");
-            log_error("PC: 0x" + to_string(state.pc));
+            log_error("PC: 0x" + std::to_string(state.pc));
             state.Out = OUT_ERROR;
             break;
         }
@@ -99,7 +98,7 @@ void loadmemory(CpuState &state, const char *code_path, const char *data_path) {
 void fetch() {
     if (cpu_state.pc > INSTRUCTION_MEMORY_LIMIT) {
         cpu_state.Out =
-            OUT_MEM_END; // Programa atingiu o fim da memória de instruções
+            OUT_MEM_END;
         return;
     }
     UByte byte0 = cpu_state.Mem[cpu_state.pc];
@@ -111,7 +110,7 @@ void fetch() {
 void step() {
     fetch();
     if (cpu_state.Out != 0) {
-        return; // Se o programa já terminou, não execute mais
+        return;
     }
     decode();
     execute();
@@ -133,16 +132,16 @@ void run() {
     if (cpu_state.Out == OUT_MEM_END) {
         log_info("Programa atingiu o fim da memória de instruções.");
         print_performance_summary();
-        cout << endl;
-        cout << "-- program is finished running (dropped off bottom) --"
-             << endl;
+        std::cout << "\n";
+        std::cout << "-- program is finished running (dropped off bottom) --"
+                  << "\n";
         exit(0);
     } else if (cpu_state.Out == OUT_ECALL) {
         log_info("Programa recebeu um ecall de saida.");
         print_performance_summary();
-        cout << endl;
-        cout << "-- program is finished running (0) --"
-             << endl;
+        std::cout << "\n";
+        std::cout << "-- program is finished running (0) --"
+                  << "\n";
         exit(0);
     } else if (cpu_state.Out == OUT_ERROR) {
         print_performance_summary();

@@ -3,7 +3,7 @@
 
 #include "isa.h"
 
-enum OUT_STATUS {
+enum OUT_STATUS : UByte {
     RUNNING = 0,     // Simulador em execução
     OUT_MEM_END = 1, // Saída por fim de memória
     OUT_ECALL = 2,   // Saída por instrução ECALL

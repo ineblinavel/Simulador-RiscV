@@ -46,7 +46,7 @@ for asm in "${ASM_FILES[@]}"; do
   java -jar "$RARS_JAR" ae1 se1 nc me "$asm" >"$ref_out" 2>>"$ref_err"
   rars_rc=$?
 
-  ./trabalho >"$sim_raw" 2>"$sim_err"
+  ./riscv-sim >"$sim_raw" 2>"$sim_err"
   sim_rc=$?
   set -e
 
