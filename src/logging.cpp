@@ -6,31 +6,31 @@
 #include <sstream>
 #include <unistd.h>
 
-void log_info(const string &message) {
+void log_info(const std::string &message) {
     if(options_global.DEBUG_LEVEL >= INFO) {
-        cout << "[INFO] " << message << endl;
+        std::cout << "[INFO] " << message << "\n";
     }
 }
 
-void log_warning(const string &message) {
+void log_warning(const std::string &message) {
     if(options_global.DEBUG_LEVEL >= WARN) {
-        cerr << "\033[33m[WARNING] " << message << "\033[0m" << endl;
+        std::cerr << "\033[33m[WARNING] " << message << "\033[0m" << "\n";
     }
 }
 
-void log_error(const string &message) {
-    cerr << "\033[31m[ERROR] " << message << "\033[0m" << endl;
+void log_error(const std::string &message) {
+    std::cerr << "\033[31m[ERROR] " << message << "\033[0m" << "\n";
 }
 
 void print_performance_summary() {
     if(options_global.DEBUG_LEVEL >= INFO) {
-        stringstream ss;
+        std::stringstream ss;
         double ipc = (cpu_state.cycles > 0) ? (double)cpu_state.instret / cpu_state.cycles : 0.0;
         
         ss << "\n=== Performance Summary ===\n"
            << "Instructions Retired (instret): " << cpu_state.instret << "\n"
            << "Cycles: " << cpu_state.cycles << "\n"
-           << "IPC (Instructions per Cycle): " << fixed << setprecision(2) << ipc << "\n\n"
+           << "IPC (Instructions per Cycle): " << std::fixed << std::setprecision(2) << ipc << "\n\n"
            << "Instruction Type Distribution:\n"
            << "  ALU: " << cpu_state.alu_count << "\n"
            << "  Branch: " << cpu_state.branch_count << "\n"
@@ -41,7 +41,7 @@ void print_performance_summary() {
         log_info(ss.str());
     }
 }
-string opcode_to_string(Opcode opcode) {
+std::string opcode_to_string(Opcode opcode) {
     switch (opcode) {
         case OP_ADD: return "ADD";
         case OP_ADDI: return "ADDI";
@@ -76,8 +76,8 @@ string opcode_to_string(Opcode opcode) {
     }
 }
 
-string format_instruction_assembly(const CpuState& state) {
-    stringstream ss;
+std::string format_instruction_assembly(const CpuState& state) {
+    std::stringstream ss;
     Opcode op = state.ic_t.ins_code;
     
     // R-type: rd, rs1, rs2
@@ -121,12 +121,12 @@ string format_instruction_assembly(const CpuState& state) {
     // LUI: rd, imm
     else if (op == OP_LUI) {
         ss << opcode_to_string(op) << " x" << state.ic_t.rd << ", 0x" 
-           << hex << (state.ic_t.imm_u & 0xFFFFF) << dec;
+           << std::hex << (state.ic_t.imm_u & 0xFFFFF) << std::dec;
     }
     // AUIPC: rd, imm
     else if (op == OP_AUIPC) {
         ss << opcode_to_string(op) << " x" << state.ic_t.rd << ", 0x" 
-           << hex << (state.ic_t.imm_u & 0xFFFFF) << dec;
+           << std::hex << (state.ic_t.imm_u & 0xFFFFF) << std::dec;
     }
     // ECALL
     else if (op == OP_ECALL) {
@@ -139,8 +139,8 @@ string format_instruction_assembly(const CpuState& state) {
     return ss.str();
 }
 
-string get_register_values(const CpuState& state) {
-    stringstream ss;
+std::string get_register_values(const CpuState& state) {
+    std::stringstream ss;
     const Opcode op = state.ic_t.ins_code;
     
     // R-type: rs1, rs2, rd
@@ -183,7 +183,7 @@ string get_register_values(const CpuState& state) {
     }
     // LUI/AUIPC
     else if (op == OP_LUI || op == OP_AUIPC) {
-        ss << "  [imm=0x" << hex << (state.ic_t.imm_u & 0xFFFFF) << dec << "]";
+        ss << "  [imm=0x" << std::hex << (state.ic_t.imm_u & 0xFFFFF) << std::dec << "]";
     }
     
     return ss.str();
@@ -194,7 +194,7 @@ void log_trace(const CpuState& state) {
         static int trace_count = 0;
         trace_count++;
         
-        stringstream ss;
+        std::stringstream ss;
         
         // Detecta se stderr é terminal ou arquivo
         bool is_terminal = isatty(fileno(stderr));
@@ -210,16 +210,16 @@ void log_trace(const CpuState& state) {
             
             ss << BORDER << "┌──────────────────────────────────────────────────────────────┐" << RESET << "\n"
                << BORDER << "│ " << RESET
-               << "PC: " << PC_COLOR << "0x" << setfill('0') << setw(8) << hex << state.pc << dec 
+               << "PC: " << PC_COLOR << "0x" << std::setfill('0') << std::setw(8) << std::hex << state.pc << std::dec 
                << RESET << "  |  " 
-               << "Instr: " << INSTR_COLOR << "0x" << setfill('0') << setw(8) << hex << state.ri << dec 
+               << "Instr: " << INSTR_COLOR << "0x" << std::setfill('0') << std::setw(8) << std::hex << state.ri << std::dec 
                << RESET
                << BORDER << "  │" << RESET << "\n"
                << BORDER << "├──────────────────────────────────────────────────────────────┤" << RESET << "\n"
                << BORDER << "│ " << RESET
                << ASSEMBLY_COLOR << format_instruction_assembly(state)
                << RESET
-               << BORDER << std::string(max(0, 60 - (int)format_instruction_assembly(state).length()), ' ')
+               << BORDER << std::string(std::max(0, 60 - (int)format_instruction_assembly(state).length()), ' ')
                << "│" << RESET << "\n"
                << BORDER << "│" << RESET
                << VALUES_COLOR << get_register_values(state)
@@ -229,13 +229,13 @@ void log_trace(const CpuState& state) {
         } else {
             // Arquivo: sem cores, separador simples
             ss << "─────────────────────────────────────────────────────────────\n"
-               << "PC: 0x" << setfill('0') << setw(8) << hex << state.pc << dec 
-               << "  |  Instr: 0x" << setfill('0') << setw(8) << hex << state.ri << dec << "\n"
+               << "PC: 0x" << std::setfill('0') << std::setw(8) << std::hex << state.pc << std::dec 
+               << "  |  Instr: 0x" << std::setfill('0') << std::setw(8) << std::hex << state.ri << std::dec << "\n"
                << format_instruction_assembly(state) << "\n"
                << get_register_values(state) << "\n"
                << "─────────────────────────────────────────────────────────────";
         }
         
-        cerr << ss.str() << endl;
+        std::cerr << ss.str() << "\n";
     }
 }

@@ -1,21 +1,22 @@
 #ifndef ISA_H
 #define ISA_H
 
-#include <stdint.h>
+#include <cstdint>
 
 
-#define UByte uint8_t
-#define Byte int8_t
-#define Word int32_t
-#define UWord uint32_t
+using UByte = std::uint8_t;
+using Byte = std::int8_t;
+using Word = std::int32_t;
+using UWord = std::uint32_t;
 
-#define MEM_SIZE 16384       // Tamanho da memória
-#define NUM_REGISTERS 32     // Número de registradores
+constexpr UWord MEM_SIZE = 16384;       // Tamanho da memória
+constexpr UByte NUM_REGISTERS = 32;     // Número de registradores
 
-const UWord INSTRUCTION_MEMORY_LIMIT = 0x00000ffc;                             // Limite da memória de instruções
-const UWord DATA_MEMORY_LIMIT = 0x00003fff; // Limite da memória de dados
+constexpr UWord INSTRUCTION_MEMORY_LIMIT = 0x00000ffc;                             // Limite da memória de instruções
+constexpr UWord DATA_MEMORY_LIMIT = 0x00003fff; // Limite da memória de dados
 
-enum InstructionType {
+enum InstructionType : Byte {
+    NOP = 0,
     UNKNOWN_TYPE = -1,
     R_TYPE = 1, 
     I_TYPE = 2,
@@ -24,7 +25,7 @@ enum InstructionType {
     U_TYPE = 5,
     J_TYPE = 6
 };
-enum Opcode {
+enum Opcode : Byte {
     UNKNOWN_OPCODE = -1,
     OP_ADD = 0,
     OP_ADDI = 1,

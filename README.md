@@ -48,7 +48,7 @@ O projeto utiliza Make para compilação. Para compilar o projeto:
 make
 ```
 
-Isso criará o executável chamado `trabalho` no diretório raiz.
+Isso criará o executável chamado `riscv-sim` no diretório raiz.
 
 ## Executando o Simulador
 

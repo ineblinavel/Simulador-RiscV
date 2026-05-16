@@ -2,11 +2,10 @@
 #define LOGGING_H
 #include <string>
 #include "cpu.h"
-using namespace std;
 
-void log_info(const string &message);
-void log_error(const string &message);
-void log_warning(const string &message);
+void log_info(const std::string &message);
+void log_error(const std::string &message);
+void log_warning(const std::string &message);
 void log_trace(const CpuState& state);
 void print_performance_summary();
 

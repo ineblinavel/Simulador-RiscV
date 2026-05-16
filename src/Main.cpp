@@ -1,12 +1,6 @@
-#include "isa.h"
-#include "decode.h"
-#include "execute.h"
 #include "cpu.h"
 #include "options.h"
 #include "logging.h"
-#include <iostream>
-#include <fstream>
-using namespace std;
 
 int main(int argc, char *argv[]) {
     options_global = parse_arguments(argc, argv);

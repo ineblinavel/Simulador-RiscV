@@ -1,5 +1,7 @@
-trabalho
+riscv-sim
 .vscode
 obj
 /build
 rars*.jar
+compile_commands.json
+*.o
